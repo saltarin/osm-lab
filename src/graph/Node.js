@@ -1,7 +1,5 @@
 const uuidv1 = require('uuid/v1');
 
-//cambiar value -> vertex
-
 class Node {
     constructor(value) {
         this.key = uuidv1();

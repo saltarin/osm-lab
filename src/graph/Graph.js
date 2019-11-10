@@ -6,31 +6,42 @@ class Graph {
         this.edges = {};
     }
 
-    getNode(nodeKey) {
+    addNode(node) {
+        if (!this.nodes[node.key]) {
+            this.nodes[node.key] = node.value;
+            this.edges[node.key] = {};
+        }
+    }
+
+    addEdge(fromNodeKey, toNodeKey) {
+        this.edges[fromNodeKey][toNodeKey] = {};
+    }
+
+    addWeight(fromNodeKey, toNodeKey, weight) {
+        if (!this.goesTo(fromNodeKey, toNodeKey)) {
+            this.addEdge(fromNodeKey, toNodeKey)
+        }
+        this.edges[fromNodeKey][toNodeKey].weight = weight;
+    }
+
+    getNodeValue(nodeKey) {
         return this.nodes[nodeKey];
     }
 
     adjacentNodes(nodeKeyA, nodeKeyB) {
-        const isAConnectedToB = this.edges[nodeKeyA].size > 0 && 
-            this.edges[nodeKeyA].has(nodeKeyB);
-        const isBConnectedToA = this.edges[nodeKeyB].size > 0 && 
-            this.edges[nodeKeyB].has(nodeKeyA);
+        const isAConnectedToB = Object.keys(this.edges[nodeKeyA]).length > 0 && 
+            typeof this.edges[nodeKeyA][nodeKeyB] !== "undefined";
+        const isBConnectedToA = Object.keys(this.edges[nodeKeyB]).length > 0 && 
+            typeof this.edges[nodeKeyB][nodeKeyA] !== "undefined";
         return isAConnectedToB || isBConnectedToA;
     }
 
     edgeCount() {
-        return Object.values(this.edges).reduce((acum, curr) => acum + curr.size, 0);
+        return Object.values(this.edges).reduce((acum, edge) => acum + Object.keys(edge).length, 0);
     }
 
     nodeCount() {
         return Object.keys(this.nodes).length;
-    }
-
-    addNode(node) {
-        if (!this.nodes[node.key]) {
-            this.nodes[node.key] = node.value;
-            this.edges[node.key] = new Set();
-        }
     }
 
     removeNode(nodeKey) {
@@ -41,13 +52,9 @@ class Graph {
         }
     }
 
-    addEdge(fromNodeKey, toNodeKey) {
-        this.edges[fromNodeKey].add(toNodeKey);
-    }
-
     removeEdge(fromNodeKey, toNodeKey) {
         if (this.edges[fromNodeKey]) {
-            this.edges[fromNodeKey].delete(toNodeKey);
+            delete this.edges[fromNodeKey][toNodeKey];
         }
     }
 
@@ -61,25 +68,30 @@ class Graph {
         this.removeEdge(toNodeKey, fromNodeKey);
     }
 
-    nodeContraction(nodeA, nodeB, mergeFunc) {
-        const edgesFromA = this.edges[nodeA.key].values();
-        const edgesFromB = this.edges[nodeB.key].values();
-        const edgeSet = new Set();
-        [...edgesFromA, ...edgesFromB].forEach( edgeKey => edgeSet.add(edgeKey) );
-        const newNode = new Node();
-        newNode.value = mergeFunc(nodeA, nodeB);
+    // nodeContraction(nodeA, nodeB, mergeFunc) {
+        //missing edgeContraction
+    //     const edgesFromA = deepClone(this.edges[nodeA.key]);
+    //     const edgesFromB = deepClone(this.edges[nodeB.key]);
 
-        this.addNode(newNode);
+    //     const allEdges = {...edgesFromA, ...edgesFromB};
+    //     const newEdgeSet = {};
+    //     Object.values(allEdges).forEach( edgeKey => {
+    //         const edgeContent = deepClone(edge);
+    //         newEdgeSet[edgeKey] = edgeContent;
+    //     })
+    //     const newNode = new Node();
+    //     newNode.value = mergeFunc(nodeA, nodeB);
+    //     this.addNode(newNode);
 
-        this.redirectAllNodes(nodeA.key, newNode.key);
-        this.redirectAllNodes(nodeB.key, newNode.key);
+    //     this.redirectAllNodes(nodeA.key, newNode.key);
+    //     this.redirectAllNodes(nodeB.key, newNode.key);
 
-        this.removeNode(nodeA.key);
-        this.removeNode(nodeB.key);
+    //     this.removeNode(nodeA.key);
+    //     this.removeNode(nodeB.key);
 
-        this.edges[newNode.key] = edgeSet;
-        return newNode;
-    }
+    //     this.edges[newNode.key] = edgeSet;
+    //     return newNode;
+    // }
 
     pathContraction(path, mergeFunc) {
         throw new Error('Not Implemented');
@@ -93,8 +105,8 @@ class Graph {
             cloneGraph.addNode(newNode);
             keyAdapter[nodeKey] = newNode.key;
         }
-        for(const [nodeKey, edgeSet] of Object.entries(this.edges)) {
-            edgeSet.forEach( edgeKey => cloneGraph.addEdge(keyAdapter[edgeKey], keyAdapter[nodeKey]));
+        for(const [nodeKey, edges] of Object.entries(this.edges)) {
+            Object.keys(edges).forEach( edgeKey => cloneGraph.addEdge(keyAdapter[edgeKey], keyAdapter[nodeKey]));
         }
         return cloneGraph;
     }
@@ -104,7 +116,13 @@ class Graph {
     }
 
     goesTo(nodeFromKey, nodeToKey) {
-        return this.edges[nodeFromKey].has(nodeToKey);
+        if (!this.edges[nodeFromKey]) {
+            return false;
+        }
+        if (!this.edges[nodeFromKey][nodeToKey]) {
+            return false;
+        }
+        return !!this.edges[nodeFromKey][nodeToKey];
     }
 
     redirectTo(nodeFromKey, nodeToKey, newNodeKey) {
@@ -123,7 +141,7 @@ class Graph {
     print() {
         for (let [nodekey, value] of Object.entries(this.nodes)) {
             console.log(value);
-            const edges = Array.from(this.edges[nodekey]).map(edgeKey => this.nodes[edgeKey]).join(',');
+            const edges = Object.keys(this.edges[nodekey]).map(edgeKey => this.nodes[edgeKey]).join(',');
             console.log(`-> ${edges}`);
         }
     }
