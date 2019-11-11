@@ -167,4 +167,24 @@ describe('Graph', () => {
         graph.addEdge(nodeA.key, nodeB.key);
         expect(graph.edges[nodeA.key][nodeB.key]).toEqual({});
     });
+
+    it('forEachEdge', () => {
+        const graph = new Graph();
+        const nodeA = new Node('A');
+        const nodeB = new Node('B');
+        const nodeC = new Node('C');
+        const nodeD = new Node('D');
+        graph.addNode(nodeA);
+        graph.addNode(nodeB);
+        graph.addNode(nodeC);
+        graph.addNode(nodeD);
+        graph.addEdge(nodeA.key, nodeB.key);
+        graph.addEdge(nodeA.key, nodeC.key);
+        graph.addEdge(nodeA.key, nodeD.key);
+        const edges = [];
+        graph.forEachEdge(nodeA.key, (nodeKey, edgeKey, content) => {
+            edges.push(edgeKey);
+        });
+        expect(edges.length).toEqual(Object.keys(graph.edges[nodeA.key]).length);
+    });
 });

@@ -1,18 +1,39 @@
 const Graph = require('./graph/Graph');
 const Node = require('./graph/Node');
+const { dijkstra, dijkstraShortestPath, createPath, createAllPaths } = require('./graph/dijkstra');
 
-const A = new Node('A');
-const B = new Node('B');
-const C = new Node('C');
+const graph = new Graph();
+const nodeA = new Node('A');
+const nodeB = new Node('B');
+const nodeC = new Node('C');
+const nodeD = new Node('D');
+const nodeE = new Node('E');
+const nodeF = new Node('F');
+const nodeG = new Node('G');
+const nodeH = new Node('H');
+graph.addNode(nodeA);
+graph.addNode(nodeB);
+graph.addNode(nodeC);
+graph.addNode(nodeD);
+graph.addNode(nodeE);
+graph.addNode(nodeF);
+graph.addNode(nodeG);
+graph.addNode(nodeH);
+graph.addWeight(nodeA.key, nodeB.key, 3);
+graph.addWeight(nodeA.key, nodeC.key, 1);
+graph.addWeight(nodeA.key, nodeE.key, 2);
+graph.addWeight(nodeC.key, nodeA.key, 1);
+graph.addWeight(nodeB.key, nodeD.key, 3);
+graph.addWeight(nodeC.key, nodeD.key, 10);
+graph.addWeight(nodeE.key, nodeF.key, 2);
+graph.addWeight(nodeF.key, nodeD.key, 1);
+graph.addWeight(nodeC.key, nodeF.key, 5);
+graph.addWeight(nodeD.key, nodeG.key, 5);
+graph.addWeight(nodeD.key, nodeH.key, 5);
+const source = nodeA.key;
+const target = nodeD.key;
+const result = dijkstra(graph, source);
+const path = createPath(result, nodeD.key);
+const allPaths = createAllPaths(result);
+console.log('result', Object.entries(result.previusNode).map(entry => `${graph.nodes[entry[0]]} <- ${graph.nodes[entry[1]]}`));
 
-const g = new Graph();
-
-g.addNode(A);
-g.addNode(B);
-g.addNode(C);
-g.addEdge(A.key, B.key);
-g.addEdge(B.key, C.key);
-
-g.print();
-console.log('------------');
-g.transpose().print();

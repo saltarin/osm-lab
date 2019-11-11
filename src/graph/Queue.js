@@ -9,7 +9,7 @@ class Queue {
         return this.queue.shift();
     }
     isEmpty() {
-        return this.queue.length !== 0;
+        return this.queue.length === 0;
     }
     size() {
         return this.queue.length;
@@ -19,8 +19,14 @@ class Queue {
     }
     remove(toRemove) {
         const indexOfValue = this.queue.findIndex((value) => value === toRemove);
-        if( indexOfValue !== -1) {
-            this.queue.slice(indexOfValue, indexOfValue + 1);
+        if (indexOfValue === -1) {
+            return;
         }
+        this.queue.splice(indexOfValue, 1);
+    }
+    find(value) {
+        return this.queue.find(elem => elem === value);
     }
 }
+
+module.exports = Queue;
